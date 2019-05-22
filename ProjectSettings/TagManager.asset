@@ -8,6 +8,8 @@ TagManager:
   - Foe
   - Blade
   - Oneway
+  - Moni
+  - Respawns
   layers:
   - Default
   - TransparentFX
@@ -21,7 +23,7 @@ TagManager:
   - Foe
   - Oneway
   - Projectiles
-  - 
+  - Interactive
   - 
   - 
   - 
