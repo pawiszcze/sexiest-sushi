@@ -21,25 +21,27 @@ public class FoeScript : DamageableScript
     protected Rigidbody2D rig;
     protected SamuraiScript player;
     protected SpriteRenderer sprite;
-    protected Collider2D colliderS;
     protected SpawnerScript daddy;
     protected Collider2D thisCollider;
     protected Collider2D samuraiBody;
     protected Collider2D samuraiFeet;
 
-    private void Start()
+    protected virtual void Start()
     {
         player = SamuraiScript.instance;
-        daddy = parent.GetComponent<SpawnerScript>();
-        colliderS = gameObject.GetComponent<Collider2D>();
+        if (parent != null)
+        {
+            daddy = parent.GetComponent<SpawnerScript>();
+        }
+        thisCollider = gameObject.GetComponent<Collider2D>();
         samuraiBody = player.gameObject.GetComponent<Collider2D>();
-        samuraiFeet = player.gameObject.GetComponent<SamuraiScript>().feetsies.GetComponent<Collider2D>();
-        Physics2D.IgnoreLayerCollision(1 << 9, 1 << 9);
+        samuraiFeet = player.feetCollider;
     }
     
     void FixedUpdate () {
         Move();
-	}
+        Debug.Log(thisCollider + " " + gameObject.name);
+    }
 
     protected void Flip(bool i)
     {
@@ -77,7 +79,7 @@ public class FoeScript : DamageableScript
     {
         if (!player.isInvulnerable)
         {
-            player.GetDamaged(damage, colliderS);
+            player.GetDamaged(damage, thisCollider);
         }
     }
 

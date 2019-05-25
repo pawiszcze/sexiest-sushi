@@ -98,6 +98,8 @@ public class SamuraiScript : MonoBehaviour
     {
         instance = this;
         skillLevels = new int[5] { 3, 0, 0, 0, 0 };
+        feetsies = transform.GetChild(3).gameObject;
+        feetCollider = feetsies.GetComponent<Collider2D>();
     }
 
     void Start()
@@ -110,9 +112,7 @@ public class SamuraiScript : MonoBehaviour
         spearSprite = projectile.gameObject.GetComponent<SpriteRenderer>();
         lastKeyPressed = ' ';
         canControl = true;
-        feetsies = transform.GetChild(3).gameObject;
         bodyCollider = gameObject.GetComponent<Collider2D>();
-        feetCollider = feetsies.GetComponent<Collider2D>();
         rig = gameObject.GetComponent<Rigidbody2D>();
         canClimb = false;
         canJumpDown = false;
@@ -492,8 +492,9 @@ public class SamuraiScript : MonoBehaviour
     public void GetDamaged(int damage, Collider2D instigator)
     {
         StartCoroutine(Invulnerability(instigator));
-        bool isLeft = instigator.bounds.center.x > bodyCollider.bounds.center.x;
-        StartCoroutine(Knockback(0.1f, 15f, transform.position, isLeft));
+        bool isLeft = instigator.bounds.center.x < bodyCollider.bounds.center.x;
+        Debug.Log("Body Center: " + bodyCollider.bounds.center.x + ", enemy Center: " + instigator.bounds.center.x + ", is enemy left of player: " + isLeft);
+        StartCoroutine(Knockback(0.1f, 30f, transform.position, isLeft));
         if (currentHealth <= 0)
         {
             Die();
@@ -574,7 +575,7 @@ public class SamuraiScript : MonoBehaviour
         while (timer < knockbackTime)
         {
         timer += Time.deltaTime;
-            rig.AddForce(new Vector2(knockbackDirection.x * knockbackForce * 0.08f * (1 - (2 * System.Convert.ToInt32(rightOrLeft))), knockbackDirection.y * 2 * knockbackForce));
+            rig.AddForce(new Vector2(knockbackDirection.x * knockbackForce * 0.08f * (1 - (2 * System.Convert.ToInt32(!rightOrLeft))), knockbackDirection.y * 2 * knockbackForce));
             
         yield return knockbackTime;
 

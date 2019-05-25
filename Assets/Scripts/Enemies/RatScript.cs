@@ -14,8 +14,9 @@ public class RatScript : FoeScript
         expValue = 10;
     }
 
-    void Start()
+    override protected void Start()
     {
+        base.Start();
         maxSpeed = 1f;
         cooloffTime = 1f;
         currentSpeed = maxSpeed;

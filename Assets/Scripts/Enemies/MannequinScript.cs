@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Mannequin_Script : FoeScript {
-    
-	void Start () {
+public class MannequinScript : FoeScript {
+
+    override protected void Start () {
+        base.Start();
         rig = gameObject.GetComponent<Rigidbody2D>();
         facingRight = true;
         hitPoints = 1;
