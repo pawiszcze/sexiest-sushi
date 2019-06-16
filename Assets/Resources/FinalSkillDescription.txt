@@ -1,0 +1,15 @@
+0:Earth Ultimate 1|Opis pierwszego ziemnego skilla*
+1:Earth Ultimate 2|Opis drugiego ziemnego skilla*
+2:Water Ultimate 1|Opis pierwszego wodnego skilla*
+3:Water Ultimate 2|Opis drugiego wodnego skilla*
+4:Fire Ultimate 1|Opis pierwszego ognistego skilla*
+5:Fire Ultimate 2|Opis drugiego ognistego skilla*
+6:Air Ultimate 1|Opis pierwszego powietrznego skilla*
+7:Air Ultimate 2|Opis drugiego powietrznego skilla*
+8:Void Ultimate 1|Opis pierwszego otchłannego skilla*
+9:Void Ultimate 2|Opis drugiego otchłannego skilla*
+10:Earth Ultimate Skills|Brief description of Earth Ultimates or some cool flavor text here*
+20:Water Ultimate Skills|Brief description of Water Ultimates or some cool flavor text here*
+30:Fire Ultimate Skills|Brief description of Fire Ultimates or some cool flavor text here*
+40:Air Ultimate Skills|Brief description of Air Ultimates or some cool flavor text here*
+50:Void Ultimate Skills|Brief description of Void Ultimates or some cool flavor text here*

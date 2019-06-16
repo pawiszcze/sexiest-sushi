@@ -15,8 +15,4 @@ public class MannequinScript : FoeScript {
         damage = 0;
         player = SamuraiScript.instance;
     }
-	
-	override public void GetDamaged(int damage, Collider2D instigator) {
-		
-	}
 }

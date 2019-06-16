@@ -10,6 +10,7 @@ TagManager:
   - Oneway
   - Moni
   - Respawns
+  - Lava
   layers:
   - Default
   - TransparentFX

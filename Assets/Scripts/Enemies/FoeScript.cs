@@ -24,7 +24,7 @@ public class FoeScript : DamageableScript
     protected SpawnerScript daddy;
     protected Collider2D thisCollider;
     protected Collider2D samuraiBody;
-    protected Collider2D samuraiFeet;
+    //protected Collider2D samuraiFeet;
 
     protected virtual void Start()
     {
@@ -35,12 +35,11 @@ public class FoeScript : DamageableScript
         }
         thisCollider = gameObject.GetComponent<Collider2D>();
         samuraiBody = player.gameObject.GetComponent<Collider2D>();
-        samuraiFeet = player.feetCollider;
+        //samuraiFeet = player.feetCollider;
     }
     
     void FixedUpdate () {
         Move();
-        Debug.Log(thisCollider + " " + gameObject.name);
     }
 
     protected void Flip(bool i)
@@ -56,7 +55,7 @@ public class FoeScript : DamageableScript
 
     }
 
-    override public void GetDamaged(int damage, Collider2D instigator)
+    override public void GetDamaged(float damage, Collider2D instigator)
     {
         bool isLeft = false;
         if (instigator != null)
@@ -85,7 +84,11 @@ public class FoeScript : DamageableScript
 
     virtual protected void Die()
     {
-        daddy.isBabyDead = true;
+        if (daddy)
+        {
+            daddy.lostABaby = true;
+            daddy.isBabyDead = true;
+        }
         player.fireInRange.Remove(gameObject);
         player.voidInRange.Remove(gameObject);
         player.earthInRange.Remove(gameObject);
@@ -112,12 +115,12 @@ public class FoeScript : DamageableScript
             if (player.isInvulnerable)
             {
                 Physics2D.IgnoreCollision(thisCollider, samuraiBody, true);
-                Physics2D.IgnoreCollision(thisCollider, samuraiFeet, true);
+                //Physics2D.IgnoreCollision(thisCollider, samuraiFeet, true);
             }
             else
             {
                 Physics2D.IgnoreCollision(thisCollider, samuraiBody, false);
-                Physics2D.IgnoreCollision(thisCollider, samuraiFeet, false);
+                //Physics2D.IgnoreCollision(thisCollider, samuraiFeet, false);
                 DealDamage(damage);
             }
         }

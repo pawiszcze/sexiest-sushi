@@ -8,9 +8,11 @@ public class SkillAssignmentManager : MonoBehaviour {
     public static SkillAssignmentManager instance;
 
     SamuraiScript player;
+    UIReturnScript screen;
 
     public TextAsset textFile;
     public string[] table1;
+    public Button[] finalButtons;
     public Button earthBase;
     public Button waterBase;
     public Button fireBase;
@@ -18,6 +20,7 @@ public class SkillAssignmentManager : MonoBehaviour {
     public Button voidBase;
     public Text numberOfSkillpoints;
 
+    public Sprite[] sprites;
     public Sprite earthSprite;
     public Sprite waterSprite;
     public Sprite fireSprite;
@@ -33,6 +36,7 @@ public class SkillAssignmentManager : MonoBehaviour {
 
 	void Start () {
         player = SamuraiScript.instance;
+        screen = UIReturnScript.instance;
         earthButt = earthBase.GetComponent<SkillButton>();
         waterButt = waterBase.GetComponent<SkillButton>();
         fireButt = fireBase.GetComponent<SkillButton>();
@@ -51,9 +55,11 @@ public class SkillAssignmentManager : MonoBehaviour {
                 earthBase.interactable = false;
                 if (i < 4)
                 {
+                    
                     earthBase = earthButt.nextButton;
                     earthBase.onClick.AddListener(delegate { Unlock(earthBase, 0); });
                     earthBase.interactable = true;
+                    earthButt = earthBase.GetComponent<SkillButton>();
                 }
             }
         }
@@ -69,6 +75,7 @@ public class SkillAssignmentManager : MonoBehaviour {
                     waterBase = waterButt.nextButton;
                     waterBase.onClick.AddListener(delegate { Unlock(waterBase, 1); });
                     waterBase.interactable = true;
+                    waterButt = waterBase.GetComponent<SkillButton>();
                 }
             }
 
@@ -86,6 +93,7 @@ public class SkillAssignmentManager : MonoBehaviour {
                     fireBase = fireButt.nextButton;
                     fireBase.onClick.AddListener(delegate { Unlock(fireBase, 2); });
                     fireBase.interactable = true;
+                    fireButt = fireBase.GetComponent<SkillButton>();
                 }
             }
         }
@@ -101,6 +109,7 @@ public class SkillAssignmentManager : MonoBehaviour {
                     airBase = airButt.nextButton;
                     airBase.onClick.AddListener(delegate { Unlock(airBase, 3); });
                     airBase.interactable = true;
+                    airButt = airBase.GetComponent<SkillButton>();
                 }
             }
 
@@ -117,12 +126,11 @@ public class SkillAssignmentManager : MonoBehaviour {
                     voidBase = voidButt.nextButton;
                     voidBase.onClick.AddListener(delegate { Unlock(voidBase, 4); });
                     voidBase.interactable = true;
+                    voidButt = voidBase.GetComponent<SkillButton>();
                 }
 
             }
         }
-
-
     }
 	
     void Unlock(Button clicked, int column)
@@ -132,56 +140,85 @@ public class SkillAssignmentManager : MonoBehaviour {
             switch (column)
             {
                 case 0:
-                    clicked.GetComponent<SkillButton>().Unlocked(0, frame, earthSprite);
                     if (player.skillLevels[column] < 4)
                     {
+                        Procedure(clicked, column);
                         earthBase = earthButt.nextButton;
                         earthBase.onClick.AddListener(delegate { Unlock(earthBase, 0); });
-                        earthBase.interactable = true;
+                        earthButt = earthBase.GetComponent<SkillButton>();
+                    } else
+                    {
+                        screen.ShowYourself(column);
                     }
                     break;
                 case 1:
-                    clicked.GetComponent<SkillButton>().Unlocked(1, frame, waterSprite);
                     if (player.skillLevels[column] < 4)
                     {
+                        Procedure(clicked, column);
                         waterBase = waterButt.nextButton;
                         waterBase.onClick.AddListener(delegate { Unlock(waterBase, 1); });
+                        waterButt = waterBase.GetComponent<SkillButton>();
+                    }
+                    else
+                    {
+                        screen.ShowYourself(column);
                     }
                     break;
                 case 2:
 
-                    clicked.GetComponent<SkillButton>().Unlocked(2, frame, fireSprite);
                     if (player.skillLevels[column] < 4)
                     {
+                        Procedure(clicked, column);
                         fireBase = fireButt.nextButton;
                         fireBase.onClick.AddListener(delegate { Unlock(fireBase, 2); });
+                        fireButt = fireBase.GetComponent<SkillButton>();
+                    }
+                    else
+                    {
+                        screen.ShowYourself(column);
                     }
                     break;
                 case 3:
-                    clicked.GetComponent<SkillButton>().Unlocked(3, frame, airSprite);
                     if (player.skillLevels[column] < 4)
                     {
+                        Procedure(clicked, column);
                         airBase = airButt.nextButton;
                         airBase.onClick.AddListener(delegate { Unlock(airBase, 3); });
+                        airButt = airBase.GetComponent<SkillButton>();
+                    }
+                    else
+                    {
+                        screen.ShowYourself(column);
                     }
                     break;
                 case 4:
-                    clicked.GetComponent<SkillButton>().Unlocked(4, frame, voidSprite);
                     if (player.skillLevels[column] < 4)
                     {
+                        Procedure(clicked, column);
                         voidBase = voidButt.nextButton;
                         voidBase.onClick.AddListener(delegate { Unlock(voidBase, 4); });
+                        voidButt = voidBase.GetComponent<SkillButton>();
+                    }
+                    else
+                    {
+                        screen.ShowYourself(column);
                     }
                     break;
                 default:
                     Debug.Log("Error");
                     break;
             }
-            clicked.interactable = false;
-            player.skillLevels[column]++;
-            player.currentSkillPoints--;
-            GetSkillpointNumber();
+            
         }
+    }
+
+    public void Procedure(Button clicked, int column)
+    {
+        clicked.GetComponent<SkillButton>().Unlocked(column, frame, sprites[column]);
+        clicked.interactable = false;
+        player.skillLevels[column]++;
+        player.currentSkillPoints--;
+        GetSkillpointNumber();
     }
 
     void GetSkillpointNumber()

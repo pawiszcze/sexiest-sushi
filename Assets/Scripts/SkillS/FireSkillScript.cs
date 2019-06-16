@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class FireSkillScript : SkillScript
 {
-
     public static FireSkillScript instance;
 
     private void Awake()
@@ -39,36 +38,43 @@ public class FireSkillScript : SkillScript
         foreach(GameObject target in player.fireInRange) {
            
             if (!target.GetComponent<DamageableScript>().isBurning)
-            {
-                target.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                target.GetComponent<DamageableScript>().isBurning = true;
-                StartCoroutine(Extinguish(target));
+            {                
+                StartCoroutine(Extinguish(target, effectTime));
             }
         }
     }
 
-    private IEnumerator Extinguish(GameObject other)
+    public IEnumerator Extinguish(GameObject other, int time)
     {
+        other.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+        
         int i = 0;
-        DamageableScript targetScript = other.GetComponent<DamageableScript>();
+        DamageableScript targetScript;
+        
+            targetScript = other.GetComponent<DamageableScript>();
+        targetScript.isBurning = true;
+        
         isEffectActive = true;
-        while (i < effectTime * 60)
+        while (i < time * 60)
         {
             if (!gmngr.isGamePaused)
             {
+                targetScript.isBurning = true;
                 if (i % 60 == 59)
                 {
-                    if (other!=null)
+                    if (other != null)
                     {
-                        targetScript.GetDamaged(1, null);
-                    } else
+                        targetScript.GetDamaged(5, null);
+                    }
+                    else
                     {
-                        StopCoroutine(Extinguish(other));
+                        yield break;
                     }
                 }
                 i++;
                 yield return new WaitForSeconds(0);
-            }else
+            }
+            else
             {
                 yield return null;
             }

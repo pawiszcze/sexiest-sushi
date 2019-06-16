@@ -1,0 +1,9 @@
+1:Nagolennik|Opis Nagolennika*
+2:To coś z tyłu|Opis*
+3:Hełm|Opis Hełmu*
+4:Rebreather|Opis*
+5:Butki|Opis*
+6:Pas Chyba|Opis*
+7:Pancerz|Opis*
+8:Odnóża|Opis*
+9:Karwasze|Opis*

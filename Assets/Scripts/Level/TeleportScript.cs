@@ -29,7 +29,7 @@ public class TeleportScript : InteractiveScript {
 
     private void DebugIsActive()
     {
-        if (isActive && destination.isActive)
+        if (destination != null && isActive && destination.isActive)
         {
             thisSprite.color = Color.green;
             destination.thisSprite.color = Color.green;
@@ -56,7 +56,7 @@ public class TeleportScript : InteractiveScript {
             isActive = true;
             DebugIsActive();
         }
-        if (destination.isActive)
+        if (destination !=null && destination.isActive)
         {
             base.OnTriggerEnter2D(collision);
         }

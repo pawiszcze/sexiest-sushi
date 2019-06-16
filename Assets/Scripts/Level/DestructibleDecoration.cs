@@ -9,7 +9,7 @@ public class DestructibleDecoration : DamageableScript
         hitPoints = 1;       
     }
 
-    override public void GetDamaged(int damage, Collider2D instigator)
+    override public void GetDamaged(float damage, Collider2D instigator)
     {
         Destroy(this.gameObject);
     }

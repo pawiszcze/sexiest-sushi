@@ -6,7 +6,8 @@ public class SpawnerActivator : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.layer == 1 << 9 && collision.gameObject.tag == "Respawn")
+       
+        if(collision.gameObject.layer == 9 && collision.gameObject.tag == "Respawn")
         {
             collision.gameObject.GetComponent<SpawnerScript>().Activation();
         }       
@@ -14,7 +15,7 @@ public class SpawnerActivator : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == 1 << 9 && collision.gameObject.tag == "Respawn")
+        if (collision.gameObject.layer == 9 && collision.gameObject.tag == "Respawn")
         {
             collision.gameObject.GetComponent<SpawnerScript>().Deactivation();
         }

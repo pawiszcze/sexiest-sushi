@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InteractiveTentScript : InteractiveScript {
-    
-    public Canvas AuraUnlockCanvas;
-    private Canvas createdCanvas;
+public class InteractiveMakeUIScript : InteractiveScript
+{
+    public Canvas AssignedCanvas;
+    protected Canvas createdCanvas;
+    public string interName;
 
-    override protected void Start () {
+    override protected void Start()
+    {
         base.Start();
-        interactionName = "meditate";
-	}
-	
-	override public void Interact()
+        interactionName = interName;
+    }
+
+    override public void Interact()
     {
         base.Interact();
-       if(createdCanvas == null)
+        if (createdCanvas == null)
         {
-            createdCanvas = Instantiate(AuraUnlockCanvas, gmngr.transform);
+            createdCanvas = Instantiate(AssignedCanvas, gmngr.transform);
             Time.timeScale = 0;
             player.canControl = false;
         }
@@ -25,7 +27,7 @@ public class InteractiveTentScript : InteractiveScript {
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKeyUp(KeyCode.Escape))
         {
             if (createdCanvas != null)
             {

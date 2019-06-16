@@ -6,16 +6,33 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 
 
-public class SamuraiScript : MonoBehaviour
+public class SamuraiScript : DamageableScript
 {
 
     public static SamuraiScript instance;
+
+    CheckpointScript activeCheckpoint;
+    Transform startMarker;
+    Transform endMarker;
+    float reviveSpeed = 1.0f;
+    float startTime;
+    float reviveDistance;
+
+    bool canUncrouch;
+
+    private int stillInWater = 0;
+    public bool touchingLava = false;
+    Coroutine breathMeter;
+    public Coroutine burningBoots;
+    public Coroutine repairBoots;
 
     AudioSource sound;
     public GameObject projectilePrefab;
     GameObject spawnedProjectile;
     SpearScript projectile;
+    public bool touchingWater;
     public PhysicsMaterial2D freezeMaterial;
+    public PhysicsMaterial2D slideMaterial;
     public PhysicsMaterial2D usualMaterial;
     public List<GameObject> passableInRange;
     public List<GameObject> fireInRange;
@@ -27,6 +44,7 @@ public class SamuraiScript : MonoBehaviour
     GameObject characterMenuInstance;                                                                   // To be moved to InterfaceController
     public float currentHealth;
     public float currentMana;
+    bool isCrouched;
     public float fallMultiplier;
     public float lowFallMultiplier;
     public float maxHealth;
@@ -49,12 +67,15 @@ public class SamuraiScript : MonoBehaviour
     public AudioClip jumpSound;
     public AudioClip lightattackSound;
     public AudioClip heavyattackSound;
+    bool isReviving = false;
 
     Transform flash;
     float vectX;
+    bool canSwim;
     float move = 0;
     GameManagerScript gmngr;
     SpriteRenderer bodySprite;
+    Transform bodyTransform;
     SpriteRenderer flashSprite;
     SkillScript skillEarth;
     SkillScript skillWater;
@@ -63,10 +84,11 @@ public class SamuraiScript : MonoBehaviour
     SkillScript skillVoid;
     SuordScript blade;
     HealthScript healthDisplay;
+    float fracJourney;
+
+    public Coroutine BurningThingie;
     ManaScript manaDisplay;
     public Collider2D bodyCollider;
-    public Collider2D feetCollider;
-    public GameObject feetsies;
     public Rigidbody2D rig;
     float heavyAttackRecoil;
     float heavyAttackTime;
@@ -79,6 +101,7 @@ public class SamuraiScript : MonoBehaviour
     bool facingRight;
     bool isClimbing;
     bool isGrounded;
+    public bool isUnderwater;
     public bool isFalling;
     bool isJumping;
     bool startedClimbing;
@@ -91,21 +114,41 @@ public class SamuraiScript : MonoBehaviour
     int experienceToNextLevel;
     int jumpSpeed;
     int force;
+    Vector2 bottomOffset;
+    Vector2 leftOffset;
+    Vector2 rightOffset;
     char lastKeyPressed;
     SpriteRenderer spearSprite;
+    public float breathBase;
+    public float breathCurrent;
+    public float bootsBase;
+    bool canCrouch;
+    public float bootsCurrent;
+    public bool lavaVulnerable;
 
     private void Awake()
     {
         instance = this;
-        skillLevels = new int[5] { 3, 0, 0, 0, 0 };
-        feetsies = transform.GetChild(3).gameObject;
-        feetCollider = feetsies.GetComponent<Collider2D>();
+        skillLevels = new int[5] { 1, 0, 0, 0, 0 };
     }
 
     void Start()
     {
+        canCrouch = true;
+        lavaVulnerable = false;
+        canSwim = false;
+        isCrouched = false;
+        touchingWater = false;
+        Time.timeScale = 1;
+        breathBase = 6f;
+        breathCurrent = breathBase;
+        bootsBase = 1f;
+        bootsCurrent = bootsBase;
         sound = gameObject.GetComponent<AudioSource>();
         bodySprite = gameObject.GetComponent<SpriteRenderer>();
+        bottomOffset = new Vector2(0, -bodySprite.size.y / 2);
+        leftOffset = new Vector2(-bodySprite.size.x / 2, 0);
+        rightOffset = -leftOffset;
         sound.volume = 0.1f;
         auraSelected = 0;
         projectile = SpearScript.instance;
@@ -129,6 +172,7 @@ public class SamuraiScript : MonoBehaviour
         goingDown = false;
         maxSpeed = 10f;
         alreadyAttacking = false;
+        bodyTransform = this.transform;
         startedClimbing = false;
         canInteract = false;
         characterScreenOn = false;
@@ -140,7 +184,7 @@ public class SamuraiScript : MonoBehaviour
         heavyWeaponSelected = false;
         gmngr = GameManagerScript.instance;
         isInvulnerable = false;
-        maxJumpsAvailable = 2;
+        maxJumpsAvailable = 1;
         jumpsAvailable = 0;
         jumpSpeed = 700;
         force = 1000;
@@ -153,7 +197,7 @@ public class SamuraiScript : MonoBehaviour
         currentHealth = maxHealth;
         flash = transform.GetChild(4);
         flashSprite = flash.transform.GetComponent<SpriteRenderer>();
-        vectX = flashSprite.size.x*flash.transform.localScale.x;
+        vectX = flashSprite.size.x * flash.transform.localScale.x;
         blade = SuordScript.instance;
         manaDisplay = ManaScript.manaScript;
         healthDisplay = HealthScript.healthScript;
@@ -188,32 +232,79 @@ public class SamuraiScript : MonoBehaviour
         }
     }
 
+
+
     void Update()
     {
 
-        isGrounded = Physics2D.OverlapCircle(feetsies.transform.position, 0.2f, 1 << 8);
-
-        if(!isGrounded){
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, 1f, 1 << 8);
-
-            if (hit.collider != null)
-            {
-                isGrounded = true;
-                rig.velocity = new Vector2(rig.velocity.x - (hit.normal.x * 0.9f), rig.velocity.y);
-            }
+        if (gmngr.currentStageProgress == 0 && !touchingWater)
+        {
+            jumpSpeed = 400;
+        }
+        else if (!touchingWater)
+        {
+            jumpSpeed = 700;
         }
 
-        canJumpDown = Physics2D.OverlapCircle(feetsies.transform.position, 0.3f, 1 << 10) && !isGrounded;
+        if (gmngr.currentStageProgress > 1)
+        {
+            maxJumpsAvailable = 2;
+        }
+        else
+        {
+            maxJumpsAvailable = 1;
+        }
+
+        if (gmngr.currentStageProgress > 2)
+        {
+            canSwim = true;
+        }
+
+        if (gmngr.currentStageProgress > 3)
+        {
+
+        }
+        
+
+        LayerMask groundWater = 1 << 8 | 1 << 4;
+        LayerMask layers = 1 << 8 | 1 << 10;
+
+ 
+
+        isGrounded = Physics2D.OverlapBox((Vector2)transform.position, new Vector2(bodySprite.size.x - 0.1f, 0.02f), 0, groundWater);
+        canJumpDown = Physics2D.OverlapBox((Vector2)transform.position, new Vector2(bodySprite.size.x - 0.1f, 0.02f), 0, 1 << 10) && !isGrounded;
+
+        bool sideTouch = (Physics2D.OverlapBox((Vector2)transform.position + leftOffset, new Vector2(0.1f, bodySprite.size.y - 0.2f), 0, layers) || Physics2D.OverlapBox((Vector2)transform.position + rightOffset, new Vector2(0.1f, bodySprite.size.y - 0.2f), 0, layers) && !isGrounded && !canJumpDown);
+
+        if (sideTouch && !isUnderwater)
+        {
+            rig.sharedMaterial = slideMaterial;
+            rig.drag = 0;
+            isFalling = true;
+        }
+        if (sideTouch && isUnderwater)
+        {
+            isFalling = true;
+        }
+
+        if (!sideTouch && rig.sharedMaterial == slideMaterial && !isUnderwater)
+        {
+            rig.sharedMaterial = usualMaterial;
+            rig.drag = 2;
+        }
 
         if ((isGrounded || canJumpDown) && jumpsAvailable < maxJumpsAvailable)
         {
             jumpsAvailable = maxJumpsAvailable;
+
         }
 
         if (currentMana != maxMana)
         {
             StartCoroutine(RegainManaOverTime());
         }
+
+        Debug.Log("Can");
 
         if (canControl)
         {
@@ -255,8 +346,8 @@ public class SamuraiScript : MonoBehaviour
                 spawnedProjectile = Instantiate(projectilePrefab, projectile.transform.position, projectile.transform.rotation);
                 spawnedProjectile.GetComponent<SpearProjectileScript>().type = projectileType;
             }
-            
-            if((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && canClimb)
+
+            if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && canClimb)
             {
                 Climb(true);
                 startedClimbing = true;
@@ -264,37 +355,76 @@ public class SamuraiScript : MonoBehaviour
 
             if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && canClimb)
             {
-                
-                    Climb(false);
-                    startedClimbing = true;
+
+                Climb(false);
+                startedClimbing = true;
             }
-            
+
             if (Input.GetKeyDown("space") && !(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)))
             {
                 Jump();
             }
 
-            if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))) {
+            if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)))
+            {
+
+                Crouch();
+
+                if (canSwim)
+                {
+                    if (touchingWater && !isUnderwater)
+                    {
+                        if (stillInWater == 0)
+                        {
+                            if (gmngr.currentStageProgress < 4)
+                            {
+                                breathMeter = StartCoroutine(Breathage());
+                            }
+                            rig.drag = 18f;
+                            jumpSpeed = 1600;
+                            rig.sharedMaterial = slideMaterial;
+                            isFalling = true;
+                        }
+                        isUnderwater = true;
+                        stillInWater++;
+                    }
+                }
                 if (Input.GetKeyDown(KeyCode.Space) && canJumpDown)
                 {
                     goingDown = true;
                     CollisionDirection();
                     rig.velocity = new Vector2(rig.velocity.x, -10);
-                } else if (Input.GetKeyDown(KeyCode.Space) && !canJumpDown)
-                {
-                    Jump();
-                } else if(!canClimb)
+
+                }
+                else if (Input.GetKeyDown(KeyCode.Space) && !canJumpDown) { }
+                else if (!canClimb)
                 {
                     goingDown = false;
                     CollisionDirection();
                 }
+                else if (isUnderwater)
+                {
+                    rig.drag = 18f;
+                }
+
+                if (isUnderwater)
+                {
+                    rig.drag = 10f;
+                }
             }
 
-            if((Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)))
+            if ((Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)))
             {
                 isClimbing = false;
                 goingDown = false;
                 CollisionDirection();
+
+                Uncrouch();
+
+                if (isUnderwater)
+                {
+                    rig.drag = 18f;
+                }
             }
 
             if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow))
@@ -379,29 +509,52 @@ public class SamuraiScript : MonoBehaviour
                 }
             }
 
-            if((Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) || (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)))
+            if ((Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) || (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)))
             {
                 directionChanged = false;
             }
 
-            if(!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && !(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
+            if (!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && !(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
             {
                 lastKeyPressed = ' ';
             }
 
-            if (lastKeyPressed=='A')
+            if (lastKeyPressed == 'A')
             {
                 move = -1;
-            } else if (lastKeyPressed == 'D')
+            }
+            else if (lastKeyPressed == 'D')
             {
                 move = 1;
-            } else
+            }
+            else
             {
                 move = 0;
             }
-            
+
             if (move < 0 && facingRight == true) { Flip(true); }
             if (move > 0 && facingRight == false) { Flip(false); }
+
+            if (isClimbing || isUnderwater || isJumping)
+            {
+                canCrouch = false;
+                //Debug.Log(isClimbing + ", " + isUnderwater + ", " + isJumping + ", " + isFalling);
+            }
+            else
+            {
+                canCrouch = true;
+            }
+            
+
+            if ((isGrounded || canJumpDown) && !isUnderwater)
+            {
+                canCrouch = true;
+            }
+
+            if (!canCrouch)
+            {
+                Uncrouch();
+            }
 
             if (move == 0)
             {
@@ -431,7 +584,7 @@ public class SamuraiScript : MonoBehaviour
                 startedClimbing = false;
             }
         }
-
+        canUncrouch = !Physics2D.OverlapBox((Vector2)transform.position - 1.5f * bottomOffset, new Vector2(bodySprite.size.x-0.05f, bodySprite.size.y / 2), 0, 1 << 8);
         if (Input.GetKeyDown(KeyCode.C))
         {
             if (!characterScreenOn)
@@ -441,7 +594,8 @@ public class SamuraiScript : MonoBehaviour
                 canControl = false;
                 characterMenuInstance = Instantiate(characterMenu, gmngr.transform);
                 characterScreenOn = true;
-            } else
+            }
+            else
             {
                 Time.timeScale = 1 * System.Convert.ToInt32(gmngr.isGamePaused);
                 gmngr.isGamePaused = !gmngr.isGamePaused;
@@ -450,12 +604,30 @@ public class SamuraiScript : MonoBehaviour
                 characterScreenOn = false;
             }
         }
+
+        if (isReviving)
+        {
+            if (fracJourney < 1)
+            {
+                reviveSpeed = reviveDistance / iTime;
+                float distCovered = (Time.time - startTime) * reviveSpeed * 1.5f;
+                fracJourney = distCovered / reviveDistance;
+                transform.position = Vector3.Lerp(startMarker.position, endMarker.position, fracJourney);
+            }
+            else
+            {
+                currentHealth = maxHealth;
+                canControl = true;
+                isReviving = false;
+            }
+        }
     }
 
     public void AddEXP(int experienceToAdd)
     {
         currentExperience += experienceToAdd;
-        if(currentExperience >= experienceToNextLevel){
+        if (currentExperience >= experienceToNextLevel)
+        {
             currentLevel++;
             currentSkillPoints++;
             experienceToNextLevel += 20;                                                                                                                                //do wymiany
@@ -467,14 +639,13 @@ public class SamuraiScript : MonoBehaviour
         foreach (GameObject platform in passableInRange)
         {
             Collider2D platformCollider = platform.transform.GetComponent<Collider2D>();
-            if (platformCollider.bounds.max.y > feetCollider.bounds.min.y || goingDown)
+            if (platformCollider.bounds.max.y > bodyCollider.bounds.min.y || goingDown)
             {
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, true);
-                Physics2D.IgnoreCollision(platformCollider, feetCollider, true);
-            } else
+            }
+            else
             {
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, false);
-                Physics2D.IgnoreCollision(platformCollider, feetCollider, false);
             }
         }
     }
@@ -489,12 +660,22 @@ public class SamuraiScript : MonoBehaviour
         facingRight = !i;
     }
 
-    public void GetDamaged(int damage, Collider2D instigator)
+    override public void GetDamaged(float damage, Collider2D instigator)
     {
-        StartCoroutine(Invulnerability(instigator));
-        bool isLeft = instigator.bounds.center.x < bodyCollider.bounds.center.x;
-        Debug.Log("Body Center: " + bodyCollider.bounds.center.x + ", enemy Center: " + instigator.bounds.center.x + ", is enemy left of player: " + isLeft);
-        StartCoroutine(Knockback(0.1f, 30f, transform.position, isLeft));
+        if (instigator != null && !isInvulnerable)
+        {
+            Uncrouch();
+            currentHealth -= damage;
+            bool isLeft = instigator.bounds.center.x < bodyCollider.bounds.center.x;
+            StartCoroutine(Knockback(3f, 30f, transform.position, isLeft));
+            StartCoroutine(Invulnerability(instigator, instigator.gameObject.tag != "Ground"));
+        }
+        else
+        {
+            currentHealth -= damage;
+        }
+        //Debug.Log("Body Center: " + bodyCollider.bounds.center.x + ", enemy Center: " + instigator.bounds.center.x + ", is enemy left of player: " + isLeft);
+
         if (currentHealth <= 0)
         {
             Die();
@@ -510,7 +691,7 @@ public class SamuraiScript : MonoBehaviour
 
         isFalling = false;
         goingDown = true;
-        rig.velocity = new Vector2(0, maxSpeed - 2*Convert.ToInt32(!up)*maxSpeed);
+        rig.velocity = new Vector2(0, maxSpeed - 2 * Convert.ToInt32(!up) * maxSpeed);
         CollisionDirection();
         if (isGrounded)
         {
@@ -520,49 +701,224 @@ public class SamuraiScript : MonoBehaviour
 
     private void Die()
     {
-        Destroy(gameObject);
+        fracJourney = 0f;
+        activeCheckpoint = CheckpointScript.thisOne;
+        startMarker = this.transform;
+        endMarker = activeCheckpoint.transform;
+        reviveDistance = Vector3.Distance(startMarker.position, endMarker.position);
+        canControl = false;
+        //bodySprite.color = new Color(0,0,0,0);
+        startTime = Time.time;
+        isReviving = true;
+
+        //Destroy(gameObject);
     }
 
     private void Jump()
     {
-        startedClimbing = false;
-        isFalling = true;
-        isJumping = true;
-        if (jumpsAvailable > 0)
+        if (!isUnderwater)
+        {
+            startedClimbing = false;
+            isFalling = true;
+            isJumping = true;
+            if (jumpsAvailable > 0)
+            {
+                jumpsAvailable--;
+                sound.volume = 0.05f;
+                sound.clip = jumpSound;
+                sound.PlayOneShot(jumpSound);
+                sound.volume = 0.1f;
+                rig.gravityScale = 2;
+                rig.drag = 2;
+                rig.velocity = new Vector2(rig.velocity.x, 0);
+                rig.AddForce(new Vector2(0, jumpSpeed));
+            }
+        }
+        else
         {
             sound.volume = 0.05f;
             sound.clip = jumpSound;
             sound.PlayOneShot(jumpSound);
             sound.volume = 0.1f;
-            rig.gravityScale = 2;
-            rig.drag = 2;
             rig.velocity = new Vector2(rig.velocity.x, 0);
             rig.AddForce(new Vector2(0, jumpSpeed));
-            jumpsAvailable--;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            isFalling = false;
+        }
+        if (collision.gameObject.layer == 4)
+        {
+            touchingWater = true;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            isFalling = true;
+        }
+        if (collision.gameObject.layer == 4)
+        {
+            touchingWater = false;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 4)
+        {
+            if (stillInWater == 0)
+            {
+                if (gmngr.currentStageProgress < 4)
+                {
+                    breathMeter = StartCoroutine(Breathage());
+                }
+                rig.drag = 18f;
+                jumpSpeed = 1600;
+                rig.sharedMaterial = slideMaterial;
+            }
+            stillInWater++;
+            
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 4)
+        {
+            stillInWater--;
+            if (stillInWater == 0)
+            {
+                rig.drag = 2f;
+                rig.sharedMaterial = usualMaterial;
+                breathCurrent = breathBase;
+                if (breathMeter != null)
+                {
+                    StopCoroutine(breathMeter);
+                }
+
+                touchingWater = false;
+                isUnderwater = false;
+            }
+        }
+    }
+
+    private void Crouch()
+    {
+        if (canCrouch)
+        {
+            
+            isCrouched = true;
+            bodyTransform.localScale = new Vector3(1f, 0.5f, 1f);
+            maxSpeed = 5f;
+        }
+    }
+
+    private void Uncrouch()
+    {
+        if (isCrouched && canUncrouch)
+        {
+            maxSpeed = 10f;
+            isCrouched = false;
+            bodyTransform.localScale = Vector3.one;
         }
     }
 
     #region Enumeratory
 
-    private IEnumerator Invulnerability(Collider2D instigator)
+    public IEnumerator BurnOff()
+    {
+        float timer = 0;
+        while (bootsCurrent > 0)
+        {
+            timer += Time.deltaTime;
+            if (bootsCurrent > 0)
+            {
+                bootsCurrent = bootsCurrent - Time.deltaTime;
+            }
+            yield return null;
+        }
+        if (bootsCurrent < 0)
+        {
+            bootsCurrent = 0;
+        }
+        lavaVulnerable = true;
+    }
+
+    public IEnumerator BootsRestore()
+    {
+        int timer = 0;
+        lavaVulnerable = false;
+        yield return null;
+        if (!touchingLava)
+        {
+            while (bootsCurrent < bootsBase)
+            {
+                timer++;
+                if (timer % 10 == 0)
+                {
+                    bootsCurrent = bootsCurrent + Time.deltaTime;
+                }
+                if (bootsCurrent > bootsBase)
+                {
+                    bootsCurrent = bootsBase;
+                }
+                yield return null;
+            }
+        }
+        else
+        {
+            yield break;
+        }
+
+    }
+
+    private IEnumerator Breathage()
+    {
+        float timer = 0;
+        while (currentHealth > 0)
+        {
+            timer += Time.deltaTime;
+            if (breathCurrent > 0)
+            {
+                breathCurrent = breathCurrent - Time.deltaTime;
+            }
+            else
+            {
+                currentHealth = currentHealth - 10 * Time.deltaTime;
+            }
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator Invulnerability(Collider2D instigator, bool ignore)
     {
         int i = 0;
         isInvulnerable = true;
         bodySprite.color = new Color(1f, 1f, 1f, 0.3f);
-        Physics2D.IgnoreCollision(bodyCollider, instigator, true);
-        Physics2D.IgnoreCollision(feetCollider, instigator, true);
+        Physics2D.IgnoreCollision(bodyCollider, instigator, ignore);
         while (i < iTime * 60)
         {
-                i++;
-                yield return new WaitForSeconds(0);
+            i++;
+            yield return new WaitForSeconds(0);
 
         }
         isInvulnerable = false;
-        bodySprite.color = new Color(1f, 1f, 1f, 1f);
+        if (!isReviving)
+        {
+            canControl = true;
+            bodySprite.color = new Color(1f, 1f, 1f, 1f);
+        }
         if (instigator != null)
         {
             Physics2D.IgnoreCollision(bodyCollider, instigator, false);
-            Physics2D.IgnoreCollision(feetCollider, instigator, false);
         }
     }
 
@@ -571,20 +927,22 @@ public class SamuraiScript : MonoBehaviour
         float timer = 0;
         canControl = false;
         rig.sharedMaterial = freezeMaterial;
+        move = 0;
         rig.velocity = Vector2.zero;
+        rig.drag = 25;
+        rig.AddForce(new Vector2(30 * knockbackForce * 1f * (1 - (2 * System.Convert.ToInt32(!rightOrLeft))), 20 * 3f * knockbackForce));
+        rig.drag = 2;
         while (timer < knockbackTime)
         {
-        timer += Time.deltaTime;
-            rig.AddForce(new Vector2(knockbackDirection.x * knockbackForce * 0.08f * (1 - (2 * System.Convert.ToInt32(!rightOrLeft))), knockbackDirection.y * 2 * knockbackForce));
-            
-        yield return knockbackTime;
-
+            timer += Time.deltaTime;
+            yield return knockbackTime;
         }
-        rig.sharedMaterial = usualMaterial;
+        isFalling = true;
         while (!canControl)
         {
-            if (isGrounded || canJumpDown)
+            if (isGrounded || canJumpDown || canClimb)
             {
+                rig.sharedMaterial = usualMaterial;
                 canControl = true;
             }
             yield return 0;
@@ -616,10 +974,13 @@ public class SamuraiScript : MonoBehaviour
             alreadyAttacking = true;
             while (i < heavyAttackTime * 60)
             {
-                if (!gmngr.isGamePaused) { 
+                if (!gmngr.isGamePaused)
+                {
                     i++;
                     yield return new WaitForSeconds(0);
-                } else {
+                }
+                else
+                {
                     yield return null;
                 }
             }

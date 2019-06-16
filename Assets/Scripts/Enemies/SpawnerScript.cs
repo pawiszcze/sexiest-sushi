@@ -11,7 +11,7 @@ public class SpawnerScript : MonoBehaviour
     FoeScript babyScript;
     SpriteRenderer babySprite;
     public bool isBabyDead;
-    bool lostABaby;
+    public bool lostABaby;
     bool offScreen = true;
     int respawnTime;
     bool isActivated = false;
@@ -69,8 +69,11 @@ public class SpawnerScript : MonoBehaviour
         babyScript = myLilBaby.GetComponent<FoeScript>();
         babySprite = myLilBaby.GetComponent<SpriteRenderer>();
         babyScript.parent = gameObject;
-        babyScript.expValue = 0;
-        babySprite.sprite = babyScript.spent;
+        if (lostABaby)
+        {
+            babyScript.expValue = 0;
+            babySprite.sprite = babyScript.spent;
+        }
         isBabyDead = false;
     }
 

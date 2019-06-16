@@ -11,6 +11,8 @@ public class AuraUnlockScript : MonoBehaviour, IPointerEnterHandler, IPointerExi
     public int skillID;
     public Texture2D activeSprite;
     protected SamuraiScript player;
+    GorintoScript tower;
+    SpriteRenderer towerSprite;
     public static bool skillChanged = false;
     bool isActive = false;
     public static string defaultDescriptionText;
@@ -19,6 +21,8 @@ public class AuraUnlockScript : MonoBehaviour, IPointerEnterHandler, IPointerExi
     void Start()
     {
         player = SamuraiScript.instance;
+        tower = GorintoScript.instance;
+        towerSprite = tower.GetComponent<SpriteRenderer>();
         defaultDescriptionText = " ";
         Button click = gameObject.AddComponent<Button>();
         if(skillID == 5 && skillChanged != true){
@@ -49,19 +53,16 @@ public class AuraUnlockScript : MonoBehaviour, IPointerEnterHandler, IPointerExi
         }
     }
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        //string descriptionText;
-        //descriptionText = defaultDescriptionText;
-        //textBox.text = descriptionText;
-    }
+    public void OnPointerExit(PointerEventData eventData){}
 
     public void ThisOneIsActive()
     {
         player.auraSelected = skillID;
+        Debug.Log(skillID);
         frame.transform.position = new Vector3(transform.position.x, transform.position.y, frame.transform.position.z);
         SelectText();
         textBox.text = descriptionText;
+        towerSprite.sprite = tower.sprites[skillID];
     }
 
     private void SelectText()

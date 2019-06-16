@@ -18,6 +18,7 @@ public class InteractiveScript : MonoBehaviour {
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
+        //Debug.Log("Armor rack touched");
         if (player == null)
         {
             player = SamuraiScript.instance;

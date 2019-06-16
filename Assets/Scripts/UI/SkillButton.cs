@@ -15,9 +15,10 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private SamuraiScript player;
     private DescriptionBlockScript block;
     Vector2 blockSize;
+    private CanvasGroup blockCanvas;
+    private string skillName;
+    private string skillDesc;
 
-    string skillName;
-    string skillDesc;
 
     private Text title;
     private Text description;
@@ -36,6 +37,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         mngr = SkillAssignmentManager.instance;
         block = DescriptionBlockScript.instance;
         blockSize = block.gameObject.GetComponent<RectTransform>().sizeDelta;
+        blockCanvas = block.GetComponent<CanvasGroup>();
         title = block.transform.GetChild(0).gameObject.GetComponent<Text>();
         description = block.transform.GetChild(1).gameObject.GetComponent<Text>();
         isMouseOver = false;
@@ -59,57 +61,72 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (player.skillLevels[column] < 4) {
             nextButton.interactable = true;
-        }
+        } 
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         isMouseOver = true;
         active = this;
-        block.GetComponent<CanvasGroup>().alpha = 1;
+        blockCanvas.alpha = 1;
     }
-
-
 
     public void OnPointerExit(PointerEventData eventData)
     {
         isMouseOver = false;
         if (active == this)
         {
-            block.gameObject.GetComponent<CanvasGroup>().alpha = 0;
+            blockCanvas.alpha = 0;
         }
     }
 
     private void Update()
     {
-        float offsetVert = 0f;
-        float offsetHori = 0f;
+        float offsetVert;
+        float offsetHori;
         if (isMouseOver)
         {
+            if(skillID == 0 || skillID == 5 || skillID == 10 || skillID ==15 ||skillID ==20)
+            {
+                offsetVert = -30f;
+            } else
+            {
+                offsetVert = 30f;
+            }
             string[] table2 = mngr.table1[skillID].Split('/');
             title.text = table2[0];
             title.fontSize = 18;
             description.text = table2[1];
 
-            if (Input.mousePosition.y + 5f + blockSize.y < Screen.height) {
-                offsetVert = 5f;
+            if (skillID < 5)
+            {
+                //blockSize = block;
+                offsetHori = 200f ;
+            } else if (skillID > 19)
+            {
+                offsetHori = -200f;
             } else
             {
-                offsetVert = -5f;
+                offsetHori = 0;
             }
 
-            if (Input.mousePosition.x + blockSize.x / 2 + 3f < Screen.height)
+            if (Input.mousePosition.y + 5f + blockSize.y < Screen.height) {
+              //  offsetVert = 5f;
+            } else
             {
-                offsetHori = Screen.width / 50 + 3f;
+               // offsetVert = -5f;
             }
-            else
-            {
-                offsetHori = -Screen.width / 50 - 3f;
-            }
+
+            //if (Input.mousePosition.x + blockSize.x / 2 + 3f < Screen.height)
+            //{
+            //    offsetHori = Screen.width / 50 + 3f + blockSize.x/2;
+            //}
+            //else
+            //{
+            //    offsetHori = -Screen.width / 50 - 3f - blockSize.x/2;
+            //}
 
             block.transform.position = Input.mousePosition + new Vector3(offsetHori, offsetVert, 0);
         }
-
-        Debug.Log("Screen height: " + Screen.height + ", mouse plus offset pos: " + Input.mousePosition.y + 5);
     }
 }
