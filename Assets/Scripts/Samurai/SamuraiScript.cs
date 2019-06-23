@@ -125,6 +125,8 @@ public class SamuraiScript : DamageableScript
     bool canCrouch;
     public float bootsCurrent;
     public bool lavaVulnerable;
+    float walkSpeed = 9.5f;
+    float crouchedSpeed = 5f;
 
     private void Awake()
     {
@@ -170,7 +172,7 @@ public class SamuraiScript : DamageableScript
         directionChanged = false;
         lowFallMultiplier = 7.5f;
         goingDown = false;
-        maxSpeed = 10f;
+        maxSpeed = walkSpeed;
         alreadyAttacking = false;
         bodyTransform = this.transform;
         startedClimbing = false;
@@ -210,6 +212,8 @@ public class SamuraiScript : DamageableScript
 
     private void FixedUpdate()
     {
+        Debug.Log(currentHealth);
+
         if (rig.velocity.x < maxSpeed)
         {
             rig.velocity = new Vector2(move * maxSpeed, rig.velocity.y);
@@ -236,6 +240,11 @@ public class SamuraiScript : DamageableScript
 
     void Update()
     {
+
+        if (!Input.GetKey(KeyCode.DownArrow) && canUncrouch)
+        {
+            Uncrouch();
+        }
 
         if (gmngr.currentStageProgress == 0 && !touchingWater)
         {
@@ -264,12 +273,12 @@ public class SamuraiScript : DamageableScript
         {
 
         }
-        
+
 
         LayerMask groundWater = 1 << 8 | 1 << 4;
         LayerMask layers = 1 << 8 | 1 << 10;
 
- 
+
 
         isGrounded = Physics2D.OverlapBox((Vector2)transform.position, new Vector2(bodySprite.size.x - 0.1f, 0.02f), 0, groundWater);
         canJumpDown = Physics2D.OverlapBox((Vector2)transform.position, new Vector2(bodySprite.size.x - 0.1f, 0.02f), 0, 1 << 10) && !isGrounded;
@@ -304,7 +313,7 @@ public class SamuraiScript : DamageableScript
             StartCoroutine(RegainManaOverTime());
         }
 
-        Debug.Log("Can");
+        //Debug.Log("Can");
 
         if (canControl)
         {
@@ -391,6 +400,7 @@ public class SamuraiScript : DamageableScript
                 }
                 if (Input.GetKeyDown(KeyCode.Space) && canJumpDown)
                 {
+                    Debug.Log("I'm wrong");
                     goingDown = true;
                     CollisionDirection();
                     rig.velocity = new Vector2(rig.velocity.x, -10);
@@ -495,18 +505,19 @@ public class SamuraiScript : DamageableScript
 
             if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
             {
-                if (!directionChanged)
-                {
-                    if (lastKeyPressed == 'A')
-                    {
-                        lastKeyPressed = 'D';
-                    }
-                    else if (lastKeyPressed == 'D')
-                    {
-                        lastKeyPressed = 'A';
-                    }
-                    directionChanged = true;
-                }
+                lastKeyPressed = ' ';
+                //    if (!directionChanged)
+                //    {
+                //        if (lastKeyPressed == 'A')
+                //        {
+                //            lastKeyPressed = 'D';
+                //        }
+                //        else if (lastKeyPressed == 'D')
+                //        {
+                //            lastKeyPressed = 'A';
+                //        }
+                //        directionChanged = true;
+                //    }
             }
 
             if ((Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) || (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)))
@@ -544,7 +555,7 @@ public class SamuraiScript : DamageableScript
             {
                 canCrouch = true;
             }
-            
+
 
             if ((isGrounded || canJumpDown) && !isUnderwater)
             {
@@ -584,7 +595,7 @@ public class SamuraiScript : DamageableScript
                 startedClimbing = false;
             }
         }
-        canUncrouch = !Physics2D.OverlapBox((Vector2)transform.position - 1.5f * bottomOffset, new Vector2(bodySprite.size.x-0.05f, bodySprite.size.y / 2), 0, 1 << 8);
+        canUncrouch = !Physics2D.OverlapBox((Vector2)transform.position - 1.5f * bottomOffset, new Vector2(bodySprite.size.x - 0.05f, bodySprite.size.y / 2), 0, 1 << 8);
         if (Input.GetKeyDown(KeyCode.C))
         {
             if (!characterScreenOn)
@@ -638,14 +649,20 @@ public class SamuraiScript : DamageableScript
     {
         foreach (GameObject platform in passableInRange)
         {
+
             Collider2D platformCollider = platform.transform.GetComponent<Collider2D>();
+
+
+
             if (platformCollider.bounds.max.y > bodyCollider.bounds.min.y || goingDown)
             {
+                Debug.Log("Beep");
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, true);
             }
             else
             {
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, false);
+                Debug.Log("Boop");
             }
         }
     }
@@ -666,6 +683,10 @@ public class SamuraiScript : DamageableScript
         {
             Uncrouch();
             currentHealth -= damage;
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
             bool isLeft = instigator.bounds.center.x < bodyCollider.bounds.center.x;
             StartCoroutine(Knockback(3f, 30f, transform.position, isLeft));
             StartCoroutine(Invulnerability(instigator, instigator.gameObject.tag != "Ground"));
@@ -673,13 +694,16 @@ public class SamuraiScript : DamageableScript
         else
         {
             currentHealth -= damage;
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
         }
         //Debug.Log("Body Center: " + bodyCollider.bounds.center.x + ", enemy Center: " + instigator.bounds.center.x + ", is enemy left of player: " + isLeft);
 
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        Debug.Log(currentHealth);
+
+
     }
 
     private void Climb(bool up)
@@ -784,7 +808,7 @@ public class SamuraiScript : DamageableScript
                 rig.sharedMaterial = slideMaterial;
             }
             stillInWater++;
-            
+
         }
     }
 
@@ -813,10 +837,10 @@ public class SamuraiScript : DamageableScript
     {
         if (canCrouch)
         {
-            
+
             isCrouched = true;
             bodyTransform.localScale = new Vector3(1f, 0.5f, 1f);
-            maxSpeed = 5f;
+            maxSpeed = crouchedSpeed;
         }
     }
 
@@ -824,7 +848,7 @@ public class SamuraiScript : DamageableScript
     {
         if (isCrouched && canUncrouch)
         {
-            maxSpeed = 10f;
+            maxSpeed = walkSpeed;
             isCrouched = false;
             bodyTransform.localScale = Vector3.one;
         }
@@ -891,7 +915,8 @@ public class SamuraiScript : DamageableScript
             }
             else
             {
-                currentHealth = currentHealth - 10 * Time.deltaTime;
+                GetDamaged(10 * Time.deltaTime, null);
+                //currentHealth = currentHealth - 10 * Time.deltaTime;
             }
 
             yield return null;
