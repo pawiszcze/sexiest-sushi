@@ -12,8 +12,8 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public int skillID;
     public Button nextButton;
-    private SamuraiScript player;
-    private DescriptionBlockScript block;
+    private Samurai player;
+    private DescriptionBlock block;
     Vector2 blockSize;
     private CanvasGroup blockCanvas;
     private string skillName;
@@ -27,7 +27,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private void Awake()
     { 
-        player = SamuraiScript.instance;
+        player = Samurai.instance;
     }
 
     private void Start()
@@ -35,7 +35,7 @@ public class SkillButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         gameObject.GetComponent<Image>().alphaHitTestMinimumThreshold = 0.1f;
 
         mngr = SkillAssignmentManager.instance;
-        block = DescriptionBlockScript.instance;
+        block = DescriptionBlock.instance;
         blockSize = block.gameObject.GetComponent<RectTransform>().sizeDelta;
         blockCanvas = block.GetComponent<CanvasGroup>();
         title = block.transform.GetChild(0).gameObject.GetComponent<Text>();

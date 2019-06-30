@@ -9,7 +9,7 @@ public class SpawnerActivator : MonoBehaviour
        
         if(collision.gameObject.layer == 9 && collision.gameObject.tag == "Respawn")
         {
-            collision.gameObject.GetComponent<SpawnerScript>().Activation();
+            collision.gameObject.GetComponent<Spawner>().Activation();
         }       
     }
 
@@ -17,7 +17,7 @@ public class SpawnerActivator : MonoBehaviour
     {
         if (collision.gameObject.layer == 9 && collision.gameObject.tag == "Respawn")
         {
-            collision.gameObject.GetComponent<SpawnerScript>().Deactivation();
+            collision.gameObject.GetComponent<Spawner>().Deactivation();
         }
     }
 }

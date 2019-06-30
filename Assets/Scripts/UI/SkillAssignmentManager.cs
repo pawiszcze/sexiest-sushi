@@ -7,8 +7,8 @@ public class SkillAssignmentManager : MonoBehaviour {
 
     public static SkillAssignmentManager instance;
 
-    SamuraiScript player;
-    UIReturnScript screen;
+    Samurai player;
+    UIReturn screen;
 
     public TextAsset textFile;
     public string[] table1;
@@ -35,8 +35,8 @@ public class SkillAssignmentManager : MonoBehaviour {
     SkillButton voidButt;
 
 	void Start () {
-        player = SamuraiScript.instance;
-        screen = UIReturnScript.instance;
+        player = Samurai.instance;
+        screen = UIReturn.instance;
         earthButt = earthBase.GetComponent<SkillButton>();
         waterButt = waterBase.GetComponent<SkillButton>();
         fireButt = fireBase.GetComponent<SkillButton>();

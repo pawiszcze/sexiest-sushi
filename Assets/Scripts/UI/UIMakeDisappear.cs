@@ -6,11 +6,11 @@ using UnityEngine.UI;
 public class UIMakeDisappear : MonoBehaviour
 {
     public Canvas canvasToGo;
-    SamuraiScript player;
+    Samurai player;
     
     private void Start()
     {
-        player = SamuraiScript.instance;
+        player = Samurai.instance;
         gameObject.GetComponent<Button>().onClick.AddListener(FuckenOnClick);
     }
 
