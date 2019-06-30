@@ -16,7 +16,10 @@ public class CoinLightScript : MonoBehaviour
         gmngr = GameManagerScript.instance;
     }
 
-    // Update is called once per frame
+    /*
+     * K8's question:
+     * What is this method doing?
+     */
     public void LightUp(int x)
     {
         transform.GetChild(x).GetComponent<SpriteRenderer>().sprite = activeSprite;

@@ -134,6 +134,18 @@ public class SamuraiScript : DamageableScript
         skillLevels = new int[5] { 1, 0, 0, 0, 0 };
     }
 
+    /*
+     * K8's notes:
+     * 
+     * Sorry, but I have to say that:
+     * 
+     * This methods looks horrible!... (o.o)
+     * It has 71 lines of initializing instructions! (>.<)
+     * And that means that you have at least 71 variables in this class! (x.x)
+     * EDIT: I roughly counted about  1 1 3  variables ;p
+     * 
+     * I think that it is time for You to learn SOLID principles ;o
+     */
     void Start()
     {
         canCrouch = true;

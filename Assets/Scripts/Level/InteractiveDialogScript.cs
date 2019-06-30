@@ -80,6 +80,15 @@ public class InteractiveDialogScript : InteractiveScript
                             }
                             else
                             {
+                                /*
+                                 * K8's notes:
+                                 * 
+                                 * Update() is really bad place to use GetComponent() ;o
+                                 * 
+                                 * You could cache TextMesh of newGO to some variable 
+                                 * in InteractiveScript class when you are creating this newGO.
+                                 * 
+                                 */
                                 newGO.GetComponent<TextMesh>().text = "Press E to " + interactionName;
                                 mainUICanvasGroup.alpha = 1;
                                 Destroy(dBoxClone);
@@ -106,6 +115,12 @@ public class InteractiveDialogScript : InteractiveScript
         {
             if (areYouTalking)
             {
+                /*
+                 * K8's notes:
+                 * 
+                 * As situation above, you could cache UIDialogBoxScript and Text components 
+                 * of dBox and dText objects when you are creating them
+                 */
                 dBox.samuraiImage.color = new Color(1, 1, 1, 1);
                 dBox.GetComponent<UIDialogBoxScript>().otherImage.color = new Color(0, 0, 0, 0);
                 dText.GetComponent<Text>().alignment = TextAnchor.UpperLeft;
@@ -122,6 +137,11 @@ public class InteractiveDialogScript : InteractiveScript
         }
         else
         {
+            /*
+             * K8's notes:
+             * 
+             * Again, as mentioned above.
+             */
             dText.GetComponent<Text>().text = textToType;
         }
     }
@@ -135,6 +155,11 @@ public class InteractiveDialogScript : InteractiveScript
             isTyping = true;
             currentText = string.Concat(currentText, text[i]);
             Debug.Log(text.Length);
+            /*
+             * K8's notes:
+             * 
+             * And again.
+             */
             dText.GetComponent<Text>().text = currentText;
             float start = Time.realtimeSinceStartup;
 

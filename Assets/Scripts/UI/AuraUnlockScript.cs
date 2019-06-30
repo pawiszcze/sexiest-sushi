@@ -32,6 +32,11 @@ public class AuraUnlockScript : MonoBehaviour, IPointerEnterHandler, IPointerExi
         }
         else if (player.skillLevels[skillID] > 2)
         {
+            /*
+             * K8's notes:
+             * 
+             * Null check needed for GetComponent<RawImage>()!
+             */
             gameObject.GetComponent<RawImage>().texture = activeSprite;
             click.onClick.AddListener(delegate { ThisOneIsActive(); skillChanged = true; });
         }

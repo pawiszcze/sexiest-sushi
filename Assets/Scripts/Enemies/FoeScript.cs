@@ -26,6 +26,46 @@ public class FoeScript : DamageableScript
     protected Collider2D samuraiBody;
     //protected Collider2D samuraiFeet;
 
+    /*
+     * K8's notes:
+     * 
+     * It's my subjective opinion, but if you have a class that at some level inherits from MonoBehaviour,
+     * you should avoid naming your methods with names that already exist inside MonoBehaviour.
+     * It is to me very misleading if such method is the one that is automatically called from Unity or just
+     * an ordinary C# method that I need to call manually.
+     * 
+     * If you need to perform set of operations at certain phase of game lifetime, you could create an extra
+     * method in your base class that is called in specific moment. And this method would be overriden by all
+     * subclasses.
+     * E.g.:
+     * 
+     *      public class Base : MonoBehaviour
+     *      {
+     *          // default MonoBehaviour.Start method:
+     *          private void Start()
+     *          {
+     *              this.OnStart();
+     *          }
+     *          
+     *          // custom method that is called on MonoBehaviour.Start
+     *          protected virtual void OnStart()
+     *          {
+     *              // do stuff ...
+     *          }
+     *      }
+     *      
+     *      
+     *      public class SubClass : Base
+     *      {
+     *          protected override void OnStart()
+     *          {
+     *              // perform base OnStart logic; you can skip such call:
+     *              base.OnStart();
+     *              
+     *              // do custom SubClass stuff ...
+     *          }
+     *      }
+    */
     protected virtual void Start()
     {
         player = SamuraiScript.instance;

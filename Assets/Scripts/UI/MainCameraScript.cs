@@ -134,6 +134,12 @@ public class MainCameraScript : MonoBehaviour
     {
         if (target)
         {
+            /*
+             * K8's notes:
+             * 
+             * Update() is bad place for calling GetComponent.
+             * You'd better cache Camera component to a variable on Start().
+             */
             Vector3 point = this.gameObject.GetComponent<Camera>().WorldToViewportPoint(target.position);
             Vector3 delta = target.position - this.gameObject.GetComponent<Camera>().ViewportToWorldPoint(new Vector3(0.5f, 0.35f, point.z));
             Vector3 destination = transform.position + delta;

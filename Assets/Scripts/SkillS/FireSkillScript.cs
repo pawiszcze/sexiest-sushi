@@ -35,6 +35,11 @@ public class FireSkillScript : SkillScript
 
     protected override void Effect()
     {
+        /*
+         * K8's notes:
+         * 
+         * Just like in EarthSkillScript, you could change fireInRange to List<damageableScript>.
+         */
         foreach(GameObject target in player.fireInRange) {
            
             if (!target.GetComponent<DamageableScript>().isBurning)
@@ -44,6 +49,11 @@ public class FireSkillScript : SkillScript
         }
     }
 
+    /*
+     * K8's notes:
+     * 
+     * Situation just like in EarthSkillScript.Free(GameObject other).
+     */
     public IEnumerator Extinguish(GameObject other, int time)
     {
         other.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);

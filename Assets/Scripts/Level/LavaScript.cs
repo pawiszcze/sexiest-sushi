@@ -49,6 +49,11 @@ public class LavaScript : MonoBehaviour
         }
         if (player.touchingWater && player.BurningThingie != null)
         {
+            /*
+             * K8's notes:
+             * 
+             * You could cache SpriteRenderer inside SamuraiScript.
+             */
             player.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
             player.isBurning = false;
             burnies.StopCoroutine(player.BurningThingie);

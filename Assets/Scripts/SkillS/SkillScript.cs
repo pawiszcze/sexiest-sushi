@@ -54,6 +54,11 @@ public class SkillScript : MonoBehaviour {
     private IEnumerator SkillCooldown()
     {
         int i = 0;
+        /*
+         * K8's notes:
+         * 
+         * Cache result of the call: cd_image.GetComponent<Image>() to a variable on Start.
+         */
         Image targetImage = cd_image.GetComponent<Image>();
         isCoolingDown = true;
         while (i < cooldown) {

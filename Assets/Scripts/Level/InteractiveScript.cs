@@ -26,6 +26,12 @@ public class InteractiveScript : MonoBehaviour {
 
         if (collision.gameObject.tag == "Player")
         {
+            /*
+             * K8's question:
+             * 
+             * What do these intructions below?
+             * 
+             */
             if (transform.childCount == 0)
             {
                 newGO = new GameObject("myTextGO");

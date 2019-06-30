@@ -41,6 +41,22 @@ public class SpearProjectileScript : MonoBehaviour {
             connection.enabled = true;
             connection.connectedBody = collision.rigidbody;
             rig.velocity = new Vector2(0,0);
+            /*
+             * K8's notes:
+             * 
+             * You twice using GetComponent to get a FoeScript instance out of collision.gameobject.
+             * It would be better if you cache the FoeScript instance to a local variable and
+             * perform following operation on that variable.
+             * E.g.:
+             * 
+             *      var foeScript = collision.gameObject.GetComponent<FoeScript>();
+             *      if (foeScript != null)
+             *      {
+             *          foeScript.attachedProjectiles.Add(this.gameObject);
+             *          foeScript.GetDamaged(5, this.gameObject.GetComponent<Collider2D>());
+             *      }
+             * 
+             */
             collision.gameObject.GetComponent<FoeScript>().attachedProjectiles.Add(this.gameObject);
             collision.gameObject.GetComponent<FoeScript>().GetDamaged(5, this.gameObject.GetComponent<Collider2D>());
             Destroy(GetComponent<Collider2D>());

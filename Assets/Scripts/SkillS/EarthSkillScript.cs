@@ -35,6 +35,19 @@ public class EarthSkillScript : SkillScript
 
     protected override void Effect()
     {
+        /*
+         * K8's notes:
+         * 
+         * List player.earthInRange could be of type List<FoeScript> instead of List<GameObject>.
+         * As a result, you don't need to call GetComponent below in order to get FoeScript instance,
+         * these instructions wolud look like this:
+         * 
+         *  foreach (FoeScript target in player.earthInRange)
+         *  {
+         *          target.currentSpeed = 0;
+         *          StartCoroutine(Free(target.gameObject));    // FoeScript at the top level is a MonoBehaviour
+         *  }
+         */
         foreach (GameObject target in player.earthInRange)
         {
                 target.GetComponent<FoeScript>().currentSpeed = 0;
@@ -42,6 +55,13 @@ public class EarthSkillScript : SkillScript
         }
     }
 
+    /*
+     * K8's notes:
+     * 
+     * You could change other type from GameObject to FoeScript.
+     * It would let you get rid of this GetComponent() call,
+     * and you still would have access to gameObject as mentioned above.
+     */
     private IEnumerator Free(GameObject other)
     {
         int i = 0;
