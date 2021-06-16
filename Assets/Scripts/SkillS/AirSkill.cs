@@ -43,7 +43,7 @@ public class AirSkill : Skill
     private IEnumerator WearOff()
     {
         int i = 0;
-        player.maxSpeed *= 2;
+        //player.maxSpeed *= 2;
         isEffectActive = true;
         while (i < effectTime * 60)
         {
@@ -58,7 +58,7 @@ public class AirSkill : Skill
             }
         }
 
-        player.maxSpeed /= 2;
+        //player.maxSpeed /= 2;
         isEffectActive = false;
     }
 }

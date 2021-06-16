@@ -126,7 +126,7 @@ public class GameManager : MonoBehaviour {
         float tempMax = coinsInLevels[level];
         float temp = (tempCoins / tempMax) * 10;
         int x = Mathf.FloorToInt(temp);
-        Debug.Log(temp);
+        //Debug.Log(temp);
         if (x > 0)
         {
             lights[level].LightUp(x - 1);

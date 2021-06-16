@@ -13,7 +13,9 @@ public class Samurai : Damageable
 
     Checkpoint activeCheckpoint;
     Transform startMarker;
-    Transform endMarker;
+    Transform endMarker; 
+    Transform bodyTransform; 
+    SpriteRenderer bodySprite;
     float reviveSpeed = 1.0f;
     float startTime;
     float reviveDistance;
@@ -45,16 +47,14 @@ public class Samurai : Damageable
     public float currentHealth;
     public float currentMana;
     bool isCrouched;
-    public float fallMultiplier;
-    public float lowFallMultiplier;
+
     public float maxHealth;
     public float maxMana;
-    public float maxSpeed;
+    public bool isClimbing;
     public bool canClimb;
-    public bool canControl;
+
     public bool canInteract;
     public bool characterScreenOn;
-    public bool goingDown;
     public bool heavyWeaponSelected;
     public bool isInvulnerable;
     public int[] skillLevels;
@@ -70,12 +70,11 @@ public class Samurai : Damageable
     bool isReviving = false;
 
     Transform flash;
-    float vectX;
+
     bool canSwim;
-    float move = 0;
+
     GameManager gmngr;
-    SpriteRenderer bodySprite;
-    Transform bodyTransform;
+    
     SpriteRenderer flashSprite;
     Skill skillEarth;
     Skill skillWater;
@@ -97,9 +96,9 @@ public class Samurai : Damageable
     float iTime;
     bool alreadyAttacking;
     bool canJumpDown;
-    bool directionChanged;
-    bool facingRight;
-    bool isClimbing;
+
+    public bool goingDown;
+    public bool canControl;
     bool isGrounded;
     public bool isUnderwater;
     public bool isFalling;
@@ -117,7 +116,7 @@ public class Samurai : Damageable
     Vector2 bottomOffset;
     Vector2 leftOffset;
     Vector2 rightOffset;
-    char lastKeyPressed;
+
     SpriteRenderer spearSprite;
     public float breathBase;
     public float breathCurrent;
@@ -125,7 +124,7 @@ public class Samurai : Damageable
     bool canCrouch;
     public float bootsCurrent;
     public bool lavaVulnerable;
-    float walkSpeed = 9.5f;
+
     float crouchedSpeed = 5f;
 
     private void Awake()
@@ -152,7 +151,7 @@ public class Samurai : Damageable
         lavaVulnerable = false;
         canSwim = false;
         isCrouched = false;
-        touchingWater = false;
+        touchingWater = false; goingDown = false;
         Time.timeScale = 1;
         breathBase = 6f;
         breathCurrent = breathBase;
@@ -167,8 +166,7 @@ public class Samurai : Damageable
         auraSelected = 0;
         projectile = Spear.instance;
         spearSprite = projectile.gameObject.GetComponent<SpriteRenderer>();
-        lastKeyPressed = ' ';
-        canControl = true;
+
         bodyCollider = gameObject.GetComponent<Collider2D>();
         rig = gameObject.GetComponent<Rigidbody2D>();
         canClimb = false;
@@ -179,12 +177,7 @@ public class Samurai : Damageable
         spearRecoil = false;
         spearRecoilTime = 1f;
         experienceToNextLevel = 10;
-        facingRight = true;
-        fallMultiplier = 5f;
-        directionChanged = false;
-        lowFallMultiplier = 7.5f;
-        goingDown = false;
-        maxSpeed = walkSpeed;
+        
         alreadyAttacking = false;
         bodyTransform = this.transform;
         startedClimbing = false;
@@ -192,7 +185,7 @@ public class Samurai : Damageable
         characterScreenOn = false;
         heavyAttackRecoil = 0.25f;
         heavyAttackTime = 0.25f;
-        isClimbing = false;
+        
         lightAttackRecoil = 0.05f;
         lightAttackTime = 0.05f;
         heavyWeaponSelected = false;
@@ -211,7 +204,7 @@ public class Samurai : Damageable
         currentHealth = maxHealth;
         flash = transform.GetChild(4);
         flashSprite = flash.transform.GetComponent<SpriteRenderer>();
-        vectX = flashSprite.size.x * flash.transform.localScale.x;
+
         blade = Suord.instance;
         manaDisplay = Mana.manaScript;
         healthDisplay = Health.healthScript;
@@ -222,31 +215,7 @@ public class Samurai : Damageable
         skillVoid = VoidSkill.instance;
     }
 
-    private void FixedUpdate()
-    {
-        Debug.Log(currentHealth);
 
-        if (rig.velocity.x < maxSpeed)
-        {
-            rig.velocity = new Vector2(move * maxSpeed, rig.velocity.y);
-        }
-
-        if (isFalling)
-        {
-            if (rig.velocity.y < 0)
-            {
-                rig.velocity += Vector2.up * Physics2D.gravity.y * Time.deltaTime * (fallMultiplier - 1);
-            }
-            else if (rig.velocity.y > 0 && !Input.GetKey(KeyCode.Space) && !goingDown)
-            {
-                rig.velocity += Vector2.up * Physics2D.gravity.y * Time.deltaTime * (lowFallMultiplier - 1);
-            }
-        }
-        else if (!isClimbing)
-        {
-            rig.velocity = new Vector2(rig.velocity.x, 0);
-        }
-    }
 
 
 
@@ -255,7 +224,7 @@ public class Samurai : Damageable
 
         if (!Input.GetKey(KeyCode.DownArrow) && canUncrouch)
         {
-            Uncrouch();
+            //Uncrouch();
         }
 
         if (gmngr.currentStageProgress == 0 && !touchingWater)
@@ -324,9 +293,7 @@ public class Samurai : Damageable
         {
             StartCoroutine(RegainManaOverTime());
         }
-
-        //Debug.Log("Can");
-
+        
         if (canControl)
         {
             if (!spearRecoil)
@@ -368,7 +335,7 @@ public class Samurai : Damageable
                 spawnedProjectile.GetComponent<SpearProjectile>().type = projectileType;
             }
 
-            if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && canClimb)
+            /*if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && canClimb)
             {
                 Climb(true);
                 startedClimbing = true;
@@ -379,7 +346,7 @@ public class Samurai : Damageable
 
                 Climb(false);
                 startedClimbing = true;
-            }
+            }*/
 
             if (Input.GetKeyDown("space") && !(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)))
             {
@@ -389,7 +356,7 @@ public class Samurai : Damageable
             if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)))
             {
 
-                Crouch();
+                //Crouch();
 
                 if (canSwim)
                 {
@@ -412,7 +379,6 @@ public class Samurai : Damageable
                 }
                 if (Input.GetKeyDown(KeyCode.Space) && canJumpDown)
                 {
-                    Debug.Log("I'm wrong");
                     goingDown = true;
                     CollisionDirection();
                     rig.velocity = new Vector2(rig.velocity.x, -10);
@@ -441,7 +407,7 @@ public class Samurai : Damageable
                 goingDown = false;
                 CollisionDirection();
 
-                Uncrouch();
+                //Uncrouch();
 
                 if (isUnderwater)
                 {
@@ -505,63 +471,9 @@ public class Samurai : Damageable
                 skillVoid.Activate();
             }
 
-            if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && !(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)))
-            {
-                lastKeyPressed = 'D';
-            }
-
-            if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && !(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
-            {
-                lastKeyPressed = 'A';
-            }
-
-            if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
-            {
-                lastKeyPressed = ' ';
-                //    if (!directionChanged)
-                //    {
-                //        if (lastKeyPressed == 'A')
-                //        {
-                //            lastKeyPressed = 'D';
-                //        }
-                //        else if (lastKeyPressed == 'D')
-                //        {
-                //            lastKeyPressed = 'A';
-                //        }
-                //        directionChanged = true;
-                //    }
-            }
-
-            if ((Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) || (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)))
-            {
-                directionChanged = false;
-            }
-
-            if (!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && !(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)))
-            {
-                lastKeyPressed = ' ';
-            }
-
-            if (lastKeyPressed == 'A')
-            {
-                move = -1;
-            }
-            else if (lastKeyPressed == 'D')
-            {
-                move = 1;
-            }
-            else
-            {
-                move = 0;
-            }
-
-            if (move < 0 && facingRight == true) { Flip(true); }
-            if (move > 0 && facingRight == false) { Flip(false); }
-
             if (isClimbing || isUnderwater || isJumping)
             {
                 canCrouch = false;
-                //Debug.Log(isClimbing + ", " + isUnderwater + ", " + isJumping + ", " + isFalling);
             }
             else
             {
@@ -576,10 +488,10 @@ public class Samurai : Damageable
 
             if (!canCrouch)
             {
-                Uncrouch();
+                //Uncrouch();
             }
 
-            if (move == 0)
+            /*if (move == 0)
             {
                 if (!isClimbing && startedClimbing)
                 {
@@ -600,7 +512,7 @@ public class Samurai : Damageable
                 {
                     rig.constraints = RigidbodyConstraints2D.FreezeRotation;
                 }
-            }
+            }*/
 
             if (!canClimb)
             {
@@ -679,21 +591,13 @@ public class Samurai : Damageable
         }
     }
 
-    void Flip(bool i)
-    {
-        int flip = Convert.ToInt32(i);
-        bodySprite.flipX = i;
-        spearSprite.flipX = i;                                                                                                                            //CHECK AFTER ROTATION IMPLEMENTED
-        flashSprite.flipX = i;
-        flash.transform.localPosition = new Vector3(flash.transform.localPosition.x + vectX - (flip * 2 * vectX), flash.transform.localPosition.y, flash.transform.localPosition.z);
-        facingRight = !i;
-    }
+
 
     override public void GetDamaged(float damage, Collider2D instigator)
     {
         if (instigator != null && !isInvulnerable)
         {
-            Uncrouch();
+            //Uncrouch();
             currentHealth -= damage;
             if (currentHealth <= 0)
             {
@@ -718,22 +622,7 @@ public class Samurai : Damageable
 
     }
 
-    private void Climb(bool up)
-    {
-        isClimbing = true;
-        jumpsAvailable = maxJumpsAvailable;
-        rig.gravityScale = 0;
-        rig.drag = 100;
 
-        isFalling = false;
-        goingDown = true;
-        rig.velocity = new Vector2(0, maxSpeed - 2 * Convert.ToInt32(!up) * maxSpeed);
-        CollisionDirection();
-        if (isGrounded)
-        {
-            rig.drag = 2;
-        }
-    }
 
     private void Die()
     {
@@ -852,7 +741,7 @@ public class Samurai : Damageable
 
             isCrouched = true;
             bodyTransform.localScale = new Vector3(1f, 0.5f, 1f);
-            maxSpeed = crouchedSpeed;
+            //maxSpeed = crouchedSpeed;
         }
     }
 
@@ -860,7 +749,7 @@ public class Samurai : Damageable
     {
         if (isCrouched && canUncrouch)
         {
-            maxSpeed = walkSpeed;
+           // maxSpeed = walkSpeed;
             isCrouched = false;
             bodyTransform.localScale = Vector3.one;
         }
@@ -964,7 +853,7 @@ public class Samurai : Damageable
         float timer = 0;
         canControl = false;
         rig.sharedMaterial = freezeMaterial;
-        move = 0;
+        //move = 0;
         rig.velocity = Vector2.zero;
         rig.drag = 25;
         rig.AddForce(new Vector2(30 * knockbackForce * 1f * (1 - (2 * System.Convert.ToInt32(!rightOrLeft))), 20 * 3f * knockbackForce));
