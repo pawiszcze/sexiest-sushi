@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager instance;
 
+    AudioManager audioManager;
+
     public Samurai player;
     CanvasGroup settingsCanvas;
     CoinDisplay coinDisplay;
@@ -19,7 +21,7 @@ public class GameManager : MonoBehaviour {
     public CoinLight[] lights;
     public bool isGamePaused;
     public int currentStageProgress;
-    public AudioClip backgroundMusic;
+    //public AudioClip backgroundMusic;
     public AudioClip coinSound;
     public int difficultyLevel = 2;
 
@@ -37,15 +39,9 @@ public class GameManager : MonoBehaviour {
 
     private void Start()
     {
-        var audioSource = gameObject.GetComponent<AudioSource>();
-
-        if (audioSource != null)
-        {
-            audioSource.clip = backgroundMusic;
-            audioSource.loop = true;
-            audioSource.Play();
-            audioSource.volume = 0.02f;
-        }
+        audioManager = AudioManager.instance;
+        audioManager.playMusic(audioManager.backgroundMusic, 0.2f);
+       
         isGamePaused = false;
         player = Samurai.instance;
         coinDisplay = CoinDisplay.instance;

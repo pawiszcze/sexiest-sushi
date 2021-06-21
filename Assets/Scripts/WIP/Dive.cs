@@ -23,6 +23,5 @@ public class Dive : MonoBehaviour
             crouching.Uncrouch();
         }
         crouching.enabled = !player.isUnderwater;
-        Debug.Log(player.isUnderwater);
     }
 }

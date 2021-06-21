@@ -24,7 +24,6 @@ public class Jump : MonoBehaviour
 
     void JumpAction()
     {
-        Debug.Log("JumpAction");
         //jumpsAvailable--;
         audioManager.playSound(audioManager.playerJumpSound);
         /*rig.gravityScale = 2;
