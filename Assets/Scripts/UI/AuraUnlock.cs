@@ -32,12 +32,8 @@ public class AuraUnlock : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
         else if (player.skillLevels[skillID] > 2)
         {
-            /*
-             * K8's notes:
-             * 
-             * Null check needed for GetComponent<RawImage>()!
-             */
-            gameObject.GetComponent<RawImage>().texture = activeSprite;
+            if (gameObject.GetComponent<RawImage>() != null) { gameObject.GetComponent<RawImage>().texture = activeSprite; }
+            
             click.onClick.AddListener(delegate { ThisOneIsActive(); skillChanged = true; });
         }
 
@@ -75,19 +71,19 @@ public class AuraUnlock : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         switch (skillID)
         {
             case 0:
-                descriptionText = "Earth Aura: Gives the projectiles a chance to be infused with Earth Energy. Earth Projectiles will stop enemies around it from moving for a few seconds.";
+                descriptionText = "Earth Aura description placeholder";
                 break;
             case 1:
-                descriptionText = "Water Aura: Gives the projectiles a chance to be infused with Water Energy. Water Projectiles will whatever.";
+                descriptionText = "Water Aura description placeholder";
                 break;
             case 2:
-                descriptionText = "Fire Aura: Gives the projectiles a chance to be infused with Fire Energy. Fire Projectiles will burn enemies, duh.";
+                descriptionText = "Fire Aura description placeholder";
                 break;
             case 3:
-                descriptionText = "Air Aura: Gives the projectiles a chance to be infused with Air Energy. Air Projectiles will pierce enemies? I guess.";
+                descriptionText = "Air Aura description placeholder";
                 break;
             case 4:
-                descriptionText = "Void Aura: Gives the projectiles a chance to be infused with Void Energy. Scares enemies off on hit or something.";
+                descriptionText = "Void Aura description placeholder";
                 break;
             case 5:
                 descriptionText = "No Aura Selected: The projectiles will have no additional effects.";

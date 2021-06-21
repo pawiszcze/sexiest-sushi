@@ -14,13 +14,13 @@ public class Samurai : Damageable
     Checkpoint activeCheckpoint;
     Transform startMarker;
     Transform endMarker; 
-    Transform bodyTransform; 
+    public Transform bodyTransform; 
     SpriteRenderer bodySprite;
     float reviveSpeed = 1.0f;
     float startTime;
     float reviveDistance;
 
-    bool canUncrouch;
+
 
     private int stillInWater = 0;
     public bool touchingLava = false;
@@ -46,8 +46,14 @@ public class Samurai : Damageable
     GameObject characterMenuInstance;                                                                   // To be moved to InterfaceController
     public float currentHealth;
     public float currentMana;
-    bool isCrouched;
 
+    bool canCrouch;
+    bool canUncrouch;
+    bool isCrouched;
+    float crouchedSpeed = 5f;
+
+    public float fallMultiplier;
+    public float lowFallMultiplier;
     public float maxHealth;
     public float maxMana;
     public bool isClimbing;
@@ -121,11 +127,11 @@ public class Samurai : Damageable
     public float breathBase;
     public float breathCurrent;
     public float bootsBase;
-    bool canCrouch;
+
     public float bootsCurrent;
     public bool lavaVulnerable;
 
-    float crouchedSpeed = 5f;
+
 
     private void Awake()
     {
@@ -148,9 +154,9 @@ public class Samurai : Damageable
     void Start()
     {
         canCrouch = true;
+        isCrouched = false;
         lavaVulnerable = false;
         canSwim = false;
-        isCrouched = false;
         touchingWater = false; goingDown = false;
         Time.timeScale = 1;
         breathBase = 6f;
@@ -166,7 +172,8 @@ public class Samurai : Damageable
         auraSelected = 0;
         projectile = Spear.instance;
         spearSprite = projectile.gameObject.GetComponent<SpriteRenderer>();
-
+        //fallMultiplier = 5f;
+        //lowFallMultiplier = 7.5f;
         bodyCollider = gameObject.GetComponent<Collider2D>();
         rig = gameObject.GetComponent<Rigidbody2D>();
         canClimb = false;
@@ -215,7 +222,24 @@ public class Samurai : Damageable
         skillVoid = VoidSkill.instance;
     }
 
-
+    private void FixedUpdate()
+    {
+        /*if (isFalling)
+{
+    if (rig.velocity.y < 0)
+    {
+        rig.velocity += Vector2.up * Physics2D.gravity.y * Time.deltaTime * (fallMultiplier - 1);
+    }
+    else if (rig.velocity.y > 0 && !Input.GetKey(KeyCode.Space) && !goingDown)
+    {
+        rig.velocity += Vector2.up * Physics2D.gravity.y * Time.deltaTime * (lowFallMultiplier - 1);
+    }
+}
+else if (!isClimbing)
+{
+    rig.velocity = new Vector2(rig.velocity.x, 0);
+}*/
+    }
 
 
 
@@ -576,17 +600,15 @@ public class Samurai : Damageable
 
             Collider2D platformCollider = platform.transform.GetComponent<Collider2D>();
 
-
-
             if (platformCollider.bounds.max.y > bodyCollider.bounds.min.y || goingDown)
             {
-                Debug.Log("Beep");
+               // Debug.Log("Beep");
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, true);
             }
             else
             {
                 Physics2D.IgnoreCollision(platformCollider, bodyCollider, false);
-                Debug.Log("Boop");
+               // Debug.Log("Boop");
             }
         }
     }
@@ -615,9 +637,6 @@ public class Samurai : Damageable
                 Die();
             }
         }
-        //Debug.Log("Body Center: " + bodyCollider.bounds.center.x + ", enemy Center: " + instigator.bounds.center.x + ", is enemy left of player: " + isLeft);
-
-        Debug.Log(currentHealth);
 
 
     }
