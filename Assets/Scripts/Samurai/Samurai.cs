@@ -33,7 +33,7 @@ public class Samurai : Damageable
     public Coroutine burningBoots;
     public Coroutine repairBoots;
 
-    AudioSource sound;
+    
     public GameObject projectilePrefab;
     GameObject spawnedProjectile;
     Spear projectile;
@@ -75,7 +75,7 @@ public class Samurai : Damageable
     public int jumpsAvailable;
     public int lightDamage;
     public int maxJumpsAvailable;
-    public AudioClip jumpSound;
+    //public AudioClip jumpSound;
     public AudioClip lightattackSound;
     public AudioClip heavyattackSound;
     bool isReviving = false;
@@ -170,10 +170,8 @@ public class Samurai : Damageable
         breathCurrent = breathBase;
         bootsBase = 1f;
         bootsCurrent = bootsBase;
-        sound = gameObject.GetComponent<AudioSource>();
         leftOffset = new Vector2(-bodySprite.size.x / 2, 0);
         rightOffset = -leftOffset;
-        sound.volume = 0.1f;
         auraSelected = 0;
         projectile = Spear.instance;
         spearSprite = projectile.gameObject.GetComponent<SpriteRenderer>();
@@ -673,10 +671,6 @@ else if (!isClimbing)
             if (jumpsAvailable > 0)
             {
                 jumpsAvailable--;
-                sound.volume = 0.05f;
-                sound.clip = jumpSound;
-                sound.PlayOneShot(jumpSound);
-                sound.volume = 0.1f;
                 rig.gravityScale = 2;
                 rig.drag = 2;
                 rig.velocity = new Vector2(rig.velocity.x, 0);
@@ -685,10 +679,6 @@ else if (!isClimbing)
         }
         else
         {
-            sound.volume = 0.05f;
-            sound.clip = jumpSound;
-            sound.PlayOneShot(jumpSound);
-            sound.volume = 0.1f;
             rig.velocity = new Vector2(rig.velocity.x, 0);
             rig.AddForce(new Vector2(0, jumpSpeed));
         }
@@ -919,8 +909,8 @@ else if (!isClimbing)
         int i = 0;
         if (heavyWeaponSelected)
         {
-            sound.clip = heavyattackSound;
-            sound.PlayOneShot(heavyattackSound);
+            //sound.clip = heavyattackSound;
+            //sound.PlayOneShot(heavyattackSound);
             alreadyAttacking = true;
             while (i < heavyAttackTime * 60)
             {
@@ -952,8 +942,8 @@ else if (!isClimbing)
         }
         else
         {
-            sound.clip = lightattackSound;
-            sound.PlayOneShot(lightattackSound);
+            //sound.clip = lightattackSound;
+            //sound.PlayOneShot(lightattackSound);
             alreadyAttacking = true;
             while (i < lightAttackTime * 60)
             {
