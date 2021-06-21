@@ -16593,6 +16593,8 @@ MonoBehaviour:
     type: 3}
   currentHealth: 100
   currentMana: 100
+  fallMultiplier: 0
+  lowFallMultiplier: 0
   maxHealth: 100
   maxMana: 100
   isClimbing: 0
@@ -16688,16 +16690,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8eea340f66a9c14d92c6bf36cbc49a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fallMultiplier: 0
-  lowFallMultiplier: 0
   maxSpeed: 0
-  canControl: 1
-  isFalling: 0
-  isClimbing: 0
-  isCrouched: 0
-  goingDown: 0
-  rig: {fileID: 0}
   walkSpeed: 9.5
+  canControl: 1
+  rig: {fileID: 0}
 --- !u!114 &1587549520
 MonoBehaviour:
   m_ObjectHideFlags: 0

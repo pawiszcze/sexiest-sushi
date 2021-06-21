@@ -11,14 +11,19 @@ public class Samurai : Damageable
 
     public static Samurai instance;
 
+    private Crouching crouching;
+    private SpriteRenderer bodySprite;
+
+
     Checkpoint activeCheckpoint;
     Transform startMarker;
     Transform endMarker; 
     public Transform bodyTransform; 
-    SpriteRenderer bodySprite;
     float reviveSpeed = 1.0f;
     float startTime;
     float reviveDistance;
+
+
 
 
 
@@ -119,7 +124,6 @@ public class Samurai : Damageable
     int experienceToNextLevel;
     int jumpSpeed;
     int force;
-    Vector2 bottomOffset;
     Vector2 leftOffset;
     Vector2 rightOffset;
 
@@ -153,6 +157,9 @@ public class Samurai : Damageable
      */
     void Start()
     {
+        crouching = Crouching.instance;
+
+        bodySprite = gameObject.GetComponent<SpriteRenderer>();
         canCrouch = true;
         isCrouched = false;
         lavaVulnerable = false;
@@ -164,8 +171,6 @@ public class Samurai : Damageable
         bootsBase = 1f;
         bootsCurrent = bootsBase;
         sound = gameObject.GetComponent<AudioSource>();
-        bodySprite = gameObject.GetComponent<SpriteRenderer>();
-        bottomOffset = new Vector2(0, -bodySprite.size.y / 2);
         leftOffset = new Vector2(-bodySprite.size.x / 2, 0);
         rightOffset = -leftOffset;
         sound.volume = 0.1f;
@@ -543,7 +548,7 @@ else if (!isClimbing)
                 startedClimbing = false;
             }
         }
-        canUncrouch = !Physics2D.OverlapBox((Vector2)transform.position - 1.5f * bottomOffset, new Vector2(bodySprite.size.x - 0.05f, bodySprite.size.y / 2), 0, 1 << 8);
+        
         if (Input.GetKeyDown(KeyCode.C))
         {
             if (!characterScreenOn)
